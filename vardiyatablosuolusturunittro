@@ -1,0 +1,53 @@
+var
+calisanid, sqlinsert : String;
+vardiya, i, tarihkaydir, kisisayaci, vardiyakaydir : Integer;
+Qry : TCLSQLiteQuery;
+tarih : tcldatetime;
+
+{
+  tarihkaydir = 0;
+  vardiyakaydir = 0;
+  kisisayaci = 0;
+
+  Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath+'vardiyadata.db', '');
+  
+  try
+    Qry = Clomosy.DBSQLiteQueryWith('select userguid from calisan where admin = 0 order by userguid');
+    Qry.OpenOrExecute;
+    
+    while(not Qry.Eof)
+    {
+      tarih = Now + tarihkaydir;
+      vardiya = 0 + vardiyakaydir;
+      
+      calisanid = Qry.FieldByName('userguid').AsString;
+      //ShowMessage(Qry.FieldByName('userguid').AsString);
+      for(i = 0 to 5)
+      {
+        sqlinsert = 'insert into vardiya values ('''+DateToStr(tarih)+''','''+DateToStr(tarih+4)+''','''+IntToStr(Vardiya)+''','''+ calisanid  +''')';
+        
+        Clomosy.DBSQLiteQuery.Sql.Text = sqlinsert;
+        Clomosy.DBSQLiteQuery.Exec;
+        
+        tarih = tarih + 7;
+        vardiya = vardiya + 1;
+        vardiya = vardiya mod 3;
+      }
+      
+      vardiyakaydir = vardiyakaydir + 1;
+      vardiyakaydir = vardiyakaydir mod 3;
+      
+      kisisayaci = kisisayaci+1;
+      if(kisisayaci == 3)
+      {
+        kisisayaci = 0;
+        tarihkaydir = tarihkaydir + 2; 
+      }
+      
+      Qry.Next;
+    }
+    ShowMessage('Vardiya tablosu oluşturuldu.');
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+  }
+}

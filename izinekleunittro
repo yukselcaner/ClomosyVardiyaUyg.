@@ -1,0 +1,93 @@
+var
+starttime, finishtime : TClProDateEdit;
+izinekleform : TCLForm;
+datelayout, labellayout, bottomlayout, centerlayout : TClLayout;
+baslangiclabel, bitislabel : TClProLabel;
+onaybuton : TClProButton;
+
+void onayclick;
+var 
+sqlinsert : String;
+{
+  
+  sqlinsert = 'delete from izin where calisan = '''+ Clomosy.AppUserGUID +''';'+'insert into izin values('''+starttime.DateStr+''','''+finishtime.DateStr+''','''+ Clomosy.AppUserGUID +''',''beklemede'');';
+  
+  //ShowMessage(sqlinsert);
+  
+  Clomosy.DBSQLiteQuery.Sql.Text = sqlinsert;
+  Clomosy.DBSQLiteQuery.Exec;
+  
+  ShowMessage('İzin  isteği eklendi.');
+}
+{
+  izinekleform = TCLForm.Create(self);
+  
+  centerlayout = izinekleform.AddNewLayout(izinekleform,'centerlayout');
+  centerlayout.align = alCenter;
+  
+  datelayout = izinekleform.AddNewLayout(centerlayout,'datelayout');
+  datelayout.align = alTop;
+  datelayout.margins.top = 5;
+  datelayout.margins.left = 75;
+  
+  labellayout = izinekleform.AddNewLayout(centerlayout,'labellayout');
+  labellayout.align = alTop;
+  labellayout.Margins.left = 75;
+  
+  starttime = izinekleform.AddNewProDateEdit(datelayout, 'starttime');
+  starttime.align = alLeft;
+  starttime.width = 100;
+  starttime.Margins.left = 15;
+  starttime.clProSettings.BorderColor = clAlphaColor.clHexToColor('#1fb6fe');
+  starttime.clProSettings.BorderWidth = 2;
+  starttime.clProSettings.FontVertAlign = palcenter;
+  starttime.clProSettings.FontHorzAlign = palcenter;
+  starttime.SetclProSettings(starttime.clProSettings);
+  
+  
+  finishtime = izinekleform.AddNewProDateEdit(datelayout, 'finishtime');
+  finishtime.align = alLeft;
+  finishtime.width = 100;
+  finishtime.Margins.left = 15;
+  finishtime.clProSettings.BorderColor = clAlphaColor.clHexToColor('#1fb6fe');
+  finishtime.clProSettings.BorderWidth = 2;
+  finishtime.clProSettings.FontVertAlign = palcenter;
+  finishtime.clProSettings.FontHorzAlign = palcenter;
+  finishtime.SetclProSettings(finishtime.clProSettings);
+  
+  baslangiclabel = izinekleform.AddNewProLabel(labellayout, 'baslangiclabel', 'İzin başlangıç tarihi');
+  baslangiclabel.align = alLeft;
+  baslangiclabel.width = 100;
+  baslangiclabel.clProSettings.FontSize = 12;
+  baslangiclabel.Margins.left = 15;
+  baslangiclabel.SetclProSettings(baslangiclabel.clProSettings); 
+  
+  bitislabel = izinekleform.AddNewProLabel(labellayout, 'bitislabel', 'İzin bitiş tarihi');
+  bitislabel.align = alLeft;
+  bitislabel.width = 100;
+  bitislabel.clProSettings.FontSize = 12;
+  bitislabel.Margins.left = 15;
+  bitislabel.SetclProSettings(bitislabel.clProSettings); 
+  
+  
+  bottomlayout = izinekleform.AddNewLayout(izinekleform,'bottomlayout');
+  bottomlayout.align = alBottom;
+  bottomlayout.Margins.bottom = 200;
+  
+  onaybuton = izinekleform.AddNewProButton(bottomlayout, 'onaybuton', 'Onayla');
+  onaybuton.align = alCenter;
+  onaybuton.width = 125;
+  onaybuton.height = 35;
+  onaybuton.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  onaybuton.clProSettings.BorderWidth = 1;
+  onaybuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  onaybuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  onaybuton.clProSettings.IsRound = True;
+  onaybuton.clProSettings.FontSize = 20;
+  onaybuton.SetclProSettings(onaybuton.clProSettings); 
+  
+  izinekleform.AddNewEvent(onaybuton,tbeOnClick,'onayclick');
+  
+  izinekleform.SetFormBGImage('https://clomosy.com/demos/bg4.jpg');
+  izinekleform.Run;
+}

@@ -1,0 +1,76 @@
+var
+Qry : TCLSQLiteQuery;
+
+void createtable;
+var
+TableExists: Boolean;
+{
+  try
+      Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath+'vardiyadata.db', '');
+ 
+      Clomosy.DBSQLiteQuery.Sql.Text = 'SELECT name FROM sqlite_master WHERE type="table" AND name="calisan";';
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+
+      TableExists = not Clomosy.DBSQLiteQuery.Eof;
+      
+      if not (TableExists)
+      {
+        Clomosy.DBSQLiteQuery.Sql.Text = 'CREATE TABLE calisan(
+          userguid varchar primary key,
+          isim varchar,
+          telno varchar,
+          admin integer);
+        CREATE TABLE vardiya(
+          bastarih varchar,
+          bittarih varchar,
+          vardiyazamani char[1],
+          calisan varchar,
+          foreign key(calisan) references calisan(userguid));
+        CREATE TABLE izin(
+          bastarih varchar,
+          bittarih varchar,
+          calisan varchar,
+          izindurumu varchar,
+          foreign key (calisan) references calisan(userguid));
+        CREATE TABLE konum(
+          calisan varchar,
+          latitude varchar,
+          longitude varchar,
+          tarih varchar,
+          saat varchar,
+          foreign key (calisan) references calisan(userguid));';
+        Clomosy.DBSQLiteQuery.OpenOrExecute;
+        
+        ShowMessage('Tablo oluşturuldu');
+      }
+
+    except
+     ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+    }
+}
+
+{
+  createtable;
+
+  try
+    Qry = Clomosy.DBSQLiteQueryWith('SELECT userguid FROM calisan where userguid = '''+ Clomosy.AppUserGUID +'''');
+    Qry.OpenOrExecute;
+    if(Qry.Eof) //yeni kayıt paneli
+    {
+      Clomosy.RunUnit('kayitunit');
+    }
+    else
+    {
+      if(Clomosy.AppUserProfile)//yönetici paneli
+      {
+        Clomosy.RunUnit('yoneticiunit');
+      }
+      else //çalışan paneli
+      {
+        Clomosy.RunUnit('calisanunit');
+      }
+    }
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+  }
+}

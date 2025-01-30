@@ -1,0 +1,53 @@
+var
+izindurumuform : tclform;
+mygrid : TCLProGrid;
+Qry : TCLSQLiteQuery;
+
+void setgrid;
+var
+I :integer;
+{
+  try
+    Qry = Clomosy.DBSQLiteQueryWith('select bastarih as Başlangıç, bittarih as Bitiş, izindurumu as Durum from izin where calisan = '''+Clomosy.AppUserGUID+''';');
+    Qry.OpenOrExecute;
+    
+    mygrid.ConnectDataSet(Qry);
+
+  for (I = 0 to 3)
+  {
+      mygrid.FontSizes[I,0] = 15;
+      mygrid.FontStyles[I,0] = 1;
+      mygrid.FontColors[I,0] = clAlphaColor.clHexToColor('#000000');
+  }
+  
+  
+  mygrid.FocusedLayoutFillColor = clAlphaColor.clHexToColor('#ffffff'); 
+  mygrid.SelectedLayoutFillColor = clAlphaColor.clHexToColor('#ffffff');
+  mygrid.EndUpdate;
+  
+  
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message:
+    '+LastExceptionMessage);
+  }
+  
+}
+
+
+{
+  izindurumuform = tclform.Create(self);
+  
+  mygrid = izindurumuform.AddNewProGrid(izindurumuform,'ClProGrid2');
+  mygrid.Align = alTop;
+  mygrid.Height = 300;
+  mygrid.BeginUpdate;
+  mygrid.ColumnCount = 3;
+  
+  mygrid.AutoSizeColumns(True,25);
+  mygrid.Options.ColumnSize.StretchAll = True;
+   
+   setgrid;
+  
+  izindurumuform.SetFormBGImage('https://clomosy.com/demos/bg4.jpg');
+  izindurumuform.Run;
+}

@@ -1,0 +1,125 @@
+var
+calisanform : tclform;
+bottomlayout: TClLayout;
+Qry : TCLSQLiteQuery;
+mygrid : TCLProGrid;
+izineklebuton, konumbuton, izindurumubuton : TClProButton;
+
+void setgrid;
+var
+I :integer;
+{
+  try
+    Qry = Clomosy.DBSQLiteQueryWith(' select bastarih as Başlangıç, bittarih as Bitiş, vardiyazamani as Vardiya from vardiya inner join calisan on vardiya.calisan = calisan.userguid where calisan = '''+Clomosy.AppUserGUID+''';');    Qry.OpenOrExecute;
+    
+    mygrid.ConnectDataSet(Qry);
+
+  for (I = 0 to 3)
+  {
+      mygrid.FontSizes[I,0] = 15;
+      mygrid.FontStyles[I,0] = 1;
+      mygrid.FontColors[I,0] = clAlphaColor.clHexToColor('#000000');
+  }
+  
+  
+  mygrid.FocusedLayoutFillColor = clAlphaColor.clHexToColor('#ffffff'); 
+  mygrid.SelectedLayoutFillColor = clAlphaColor.clHexToColor('#ffffff');
+  mygrid.EndUpdate;
+  
+  
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message:
+    '+LastExceptionMessage);
+  }
+  
+}
+
+
+void izinbutonclick;
+{
+  Clomosy.RunUnit('izinekleunit')
+}
+
+void konumonayclick;
+var
+Latitude,Longitude : String;
+{
+  Latitude=clGetStringTo(Clomosy.LocationValue,'|');
+  Longitude=clGetStringAfter(Clomosy.LocationValue,'|');
+  
+  Clomosy.DBSQLiteQuery.Sql.Text = 'insert into konum values('''+Clomosy.AppUserGUID+''','''+Latitude+''','''+Longitude+''','''+DateToStr(Now)+''','''+TimeToStr(Now) +''');';
+  Clomosy.DBSQLiteQuery.Exec;
+
+//ShowMessage('insert into konum values('''+Clomosy.AppUserGUID+''','''+Latitude+''','''+Longitude+''','''+DateToStr(Now)+'-'+TimeToStr(Now) +''');');
+  ShowMessage('Konum sisteme eklendi');
+}
+
+void izindurumubutonclick;
+{
+  Clomosy.RunUnit('izindurumuunit');
+}
+
+{
+  calisanform = tclform.Create(Self);
+  
+  mygrid = calisanform.AddNewProGrid(calisanform,'ClProGrid2');
+  mygrid.Align = alTop;
+  mygrid.Height = 300;
+  mygrid.BeginUpdate;
+  mygrid.ColumnCount = 3;
+  
+  mygrid.AutoSizeColumns(True,25);
+  mygrid.Options.ColumnSize.StretchAll = True;
+  
+  setgrid;
+   
+  izindurumubuton = calisanform.AddNewProButton(calisanform, 'izindurumubuton', 'İzin durumunu göster');
+  izindurumubuton.Align = alCenter;
+  izindurumubuton.height = 35;
+  izindurumubuton.margins.bottom = 50
+  izindurumubuton.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  izindurumubuton.clProSettings.BorderWidth = 1;
+  izindurumubuton.width = 250;
+  izindurumubuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  izindurumubuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  izindurumubuton.clProSettings.IsRound = True;
+  izindurumubuton.clProSettings.FontSize = 20;
+  izindurumubuton.SetclProSettings(izindurumubuton.clProSettings); 
+  calisanform.AddNewEvent(izindurumubuton,tbeOnClick,'izindurumubutonclick');
+  
+  bottomlayout = calisanform.AddNewLayout(calisanform,'bottomlayout');
+  bottomlayout.align = alBottom;
+  bottomlayout.margins.bottom = 100;
+  bottomlayout.margins.left = 25;
+  bottomlayout.margins.right = 25;
+  
+  izineklebuton = calisanform.AddNewProButton(bottomlayout, 'izineklebuton', 'İzin');
+  izineklebuton.align = alLeft;
+  izineklebuton.width = 125;
+  izineklebuton.height = 35;
+  izineklebuton.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  izineklebuton.clProSettings.BorderWidth = 1;
+  izineklebuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  izineklebuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  izineklebuton.clProSettings.IsRound = True;
+  izineklebuton.clProSettings.FontSize = 20;
+  izineklebuton.SetclProSettings(izineklebuton.clProSettings); 
+  calisanform.AddNewEvent(izineklebuton,tbeOnClick,'izinbutonclick');
+  
+  
+  konumbuton = calisanform.AddNewProButton(bottomlayout, 'konumbuton', 'Konum onay');
+  konumbuton.align = alRight;
+  konumbuton.width = 125;
+  konumbuton.height = 35;
+  konumbuton.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  konumbuton.clProSettings.BorderWidth = 1;
+  konumbuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  konumbuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  konumbuton.clProSettings.IsRound = True;
+  konumbuton.clProSettings.FontSize = 20;
+  konumbuton.SetclProSettings(konumbuton.clProSettings); 
+  calisanform.AddNewEvent(konumbuton,tbeOnClick,'konumonayclick');
+  
+  calisanform.SetFormBGImage('https://clomosy.com/demos/bg4.jpg');
+  calisanform.Run;
+}

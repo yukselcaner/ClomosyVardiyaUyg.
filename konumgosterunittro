@@ -1,0 +1,90 @@
+var
+konumform : tclform;
+mygrid : tclstringgrid;
+Qry : TCLSQLiteQuery;
+tablotemizle : TClProButton;
+tablotemizlepanel : TclProPanel;
+
+void setgrid;
+const
+enlem1 = 38.00;
+enlem2 = 38.01;
+
+boylam1 = 32.50;
+boylam2 = 32.51;
+{
+try
+  Qry = Clomosy.DBSQLiteQueryWith('select isim, tarih, saat, latitude, longitude from konum inner join calisan on calisan.userguid = konum.calisan where tarih = '''+DateToStr(Now)+''';');
+  Qry.OpenOrExecute;
+
+  konumform.RemoveGridBinding('mylink'); 
+  konumform.AddNewGridBinding(MyGrid,Qry, 'mylink');
+  
+  while (not Qry.Eof)
+  {
+    if((Qry.FieldByName('latitude').AsString <= enlem1) || (Qry.FieldByName('latitude').AsString >= enlem2) || (Qry.FieldByName('longitude').AsString <= boylam1) || (Qry.FieldByName('longitude').AsString >= boylam2))
+    {
+      ShowMessage(Qry.FieldByName('isim').AsString +' '+ Qry.FieldByName('saat').AsString + ' yanlış konumda.');
+    }
+    Qry.Next;
+  }
+
+  
+   if (MyGrid.ColumnCount>0)
+   {
+     MyGrid.Columns[0].Width = 125;
+     MyGrid.Columns[1].Width = 125;
+     MyGrid.Columns[2].Width = 125;
+     MyGrid.Columns[3].Width = 125;
+     MyGrid.Columns[4].Width = 125;
+   }
+   MyGrid.Columns[0].Header = 'İsim';
+   MyGrid.Columns[1].Header = 'Tarih';
+   MyGrid.Columns[2].Header = 'Saat';
+   MyGrid.Columns[3].Header = 'Enlem';
+   MyGrid.Columns[4].Header = 'Boylam';
+   
+   MyGrid.ReadOnly = True;
+
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message:
+    '+LastExceptionMessage);
+  }
+}
+
+void tablotemizlebutonclick;
+{
+  Clomosy.DBSQLiteQuery.Sql.Text = 'delete from konum;';
+  Clomosy.DBSQLiteQuery.OpenOrExecute;
+  
+  ShowMessage('Konum tablosu silindi.');
+  setgrid;
+}
+{
+  konumform = tclform.Create(self);
+  
+  MyGrid = konumform.AddNewStringGrid(konumform, 'MyGrid');
+   MyGrid.Align = alTop;
+   
+   setgrid;
+  
+  tablotemizlepanel = konumform.AddNewProPanel(konumform, 'tablotemizlepanel');
+  tablotemizlepanel.Align = alBottom;
+  tablotemizlepanel.width = 250;
+  tablotemizlepanel.margins.bottom = 100;
+  
+  tablotemizle = konumform.AddNewProButton(tablotemizlepanel,'tablotemizle','Konum tablosunu temizle');
+  tablotemizle.height = 35;
+  tablotemizle.width = 250;
+  tablotemizle.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  tablotemizle.clProSettings.BorderWidth = 1;
+  tablotemizle.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  tablotemizle.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  tablotemizle.clProSettings.IsRound = True;
+  tablotemizle.clProSettings.FontSize = 20;
+  tablotemizle.SetclProSettings(tablotemizle.clProSettings); 
+  konumform.AddNewEvent(tablotemizle,tbeOnClick,'tablotemizlebutonclick');
+  
+  konumform.SetFormBGImage('https://clomosy.com/demos/bg4.jpg');
+  konumform.Run;
+}

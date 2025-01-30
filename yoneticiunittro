@@ -1,0 +1,188 @@
+var
+yoneticiform : TCLForm;
+tabloolustur, vardiyatablotemizle, konumbuton : TClProButton;
+butonlayout : TClLayout;
+Qry : TCLSQLiteQuery;
+mygrid : tclstringgrid;
+
+
+void setgrid;
+{
+  try
+    Qry = Clomosy.DBSQLiteQueryWith('select isim,calisan,bastarih,bittarih,izindurumu from izin inner join calisan on izin.calisan = calisan.userguid;');
+    Qry.OpenOrExecute;
+
+    yoneticiform.RemoveGridBinding('mylink'); 
+    yoneticiform.AddNewGridBinding(MyGrid,Qry, 'mylink');
+  
+    if (MyGrid.ColumnCount>0)
+    {
+      MyGrid.Columns[0].Width = 75;
+      MyGrid.Columns[1].Width = 125;
+      MyGrid.Columns[2].Width = 125;
+      MyGrid.Columns[3].Width = 125;
+      MyGrid.Columns[4].Width = 150;
+    }
+    MyGrid.Columns[0].Header = 'İsim';
+    MyGrid.Columns[1].Header = 'İd';
+    MyGrid.Columns[2].Header = 'Başlangıç tarihi';
+    MyGrid.Columns[3].Header = 'Bitiş tarihi';
+    MyGrid.Columns[4].Header = 'Durum';
+    
+    MyGrid.ReadOnly = True;
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message:'+LastExceptionMessage);
+  }
+}
+
+void vardiyatabloolustur;
+{
+  Clomosy.RunUnit('vardiyatablosuolusturunit');
+}
+
+void vardiyatablotemizle;
+{
+  
+  Clomosy.DBSQLiteQuery.Sql.Text = 'delete from vardiya; delete from izin;';
+  Clomosy.DBSQLiteQuery.OpenOrExecute;
+  
+  ShowMessage('Vardiya tablosu silindi.');
+}
+
+void izinonayla;
+{
+  Clomosy.DBSQLiteQuery.Sql.Text = 'update izin set izindurumu = ''Onaylandı'' where calisan = '''+ MyGrid.Cells[1,yoneticiform.clSenderRow]  +''';';
+  Clomosy.DBSQLiteQuery.Exec;
+  
+  ShowMessage('İzin talebi onaylandı');
+  
+  setgrid;
+}
+void izinreddet;
+{
+  Clomosy.DBSQLiteQuery.Sql.Text = 'update izin set izindurumu = ''Reddedildi'' where calisan = '''+ MyGrid.Cells[1,yoneticiform.clSenderRow]  +''';';
+  Clomosy.DBSQLiteQuery.Exec;
+  
+  ShowMessage('İzin talebi reddedildi');
+  
+  setgrid;
+}
+
+void OnCellClick;
+var
+izintalepform : TCLForm;
+isimlabel : TClProLabel;
+onaybuton, redbuton : TClProButton;
+butonlayout : TClLayout;
+{
+  //ShowMessage(MyGrid.Cells[1,yoneticiform.clSenderRow]);
+  izintalepform = TCLForm.Create(self);
+  
+  isimlabel = izintalepform.AddNewProLabel(izintalepform, 'isimlabel', MyGrid.Cells[0,yoneticiform.clSenderRow]+'''in izin talebi');
+  isimlabel.Align = alCenter;
+  isimlabel.clProSettings.FontVertAlign = palcenter;
+  isimlabel.clProSettings.FontHorzAlign = palcenter;
+  isimlabel.width = 250;
+  isimlabel.clProSettings.FontSize = 20;
+  isimlabel.SetclProSettings(isimlabel.clProSettings); 
+  
+  
+  butonlayout = izintalepform.AddNewLayout(izintalepform,'butonlayout');
+  butonlayout.Align = alBottom;
+  butonlayout.margins.bottom = 20;
+  butonlayout.margins.left = 15;
+  butonlayout.margins.right = 15;
+  
+  onaybuton = izintalepform.AddNewProButton(butonlayout, 'onaybuton', 'Onayla');
+  onaybuton.Align = alRight;
+  onaybuton.width = 125;
+  onaybuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  onaybuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  onaybuton.clProSettings.IsRound = True;
+  onaybuton.clProSettings.FontSize = 20;
+  onaybuton.SetclProSettings(onaybuton.clProSettings); 
+  izintalepform.AddNewEvent(onaybuton,tbeOnClick,'izinonayla');
+  
+  redbuton = izintalepform.AddNewProButton(butonlayout, 'redbuton', 'Reddet');
+  redbuton.Align = alLeft;
+  redbuton.width = 125;
+  redbuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  redbuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  redbuton.clProSettings.IsRound = True;
+  redbuton.clProSettings.FontSize = 20;
+  redbuton.SetclProSettings(redbuton.clProSettings); 
+  izintalepform.AddNewEvent(redbuton,tbeOnClick,'izinreddet');
+  
+  izintalepform.Run;
+}
+
+void konumbutonclick;
+{
+  Clomosy.RunUnit('konumgosterunit');
+}
+
+{
+  yoneticiform = TCLForm.Create(self);
+  
+  MyGrid = yoneticiform.AddNewStringGrid(yoneticiform, 'MyGrid');
+  
+    yoneticiform.AddNewEvent(MyGrid, tbeOnGridCellClick, 'OnCellClick');
+  
+  MyGrid.Align = alTop;
+ MyGrid.ReadOnly = TRUE;
+  
+  
+  setgrid;
+  
+  konumbuton = yoneticiform.AddNewProButton(yoneticiform,'konumbuton','Konum');
+  konumbuton.Align = alCenter;
+  konumbuton.height = 35;
+  konumbuton.margins.bottom = 50
+  konumbuton.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  konumbuton.clProSettings.BorderWidth = 1;
+  konumbuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  konumbuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  konumbuton.clProSettings.IsRound = True;
+  konumbuton.clProSettings.FontSize = 20;
+  konumbuton.SetclProSettings(konumbuton.clProSettings); 
+  yoneticiform.AddNewEvent(konumbuton,tbeOnClick,'konumbutonclick');
+  
+
+  
+  butonlayout = yoneticiform.AddNewLayout(yoneticiform,'butonlayout');
+  butonlayout.align = alBottom
+  butonlayout.margins.bottom = 100;
+  butonlayout.margins.left = 25;
+  butonlayout.margins.right = 25;
+  butonlayout.height = 35;
+  
+  tabloolustur = yoneticiform.AddNewProButton(butonlayout,'tabloolustur','Tablo oluştur');
+  tabloolustur.align = alRight;
+  tabloolustur.width = 125;
+  tabloolustur.height = 35;
+  tabloolustur.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  tabloolustur.clProSettings.BorderWidth = 1;
+  tabloolustur.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  tabloolustur.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  tabloolustur.clProSettings.IsRound = True;
+  tabloolustur.clProSettings.FontSize = 20;
+  tabloolustur.SetclProSettings(tabloolustur.clProSettings); 
+  
+  yoneticiform.AddNewEvent(tabloolustur,tbeOnClick,'vardiyatabloolustur');
+  
+  vardiyatablotemizle = yoneticiform.AddNewProButton(butonlayout,'vardiyatablotemizle','Tablo temizle');
+  vardiyatablotemizle.align = alLeft;
+  vardiyatablotemizle.width = 125;
+  vardiyatablotemizle.height = 35;
+  vardiyatablotemizle.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+  vardiyatablotemizle.clProSettings.BorderWidth = 1;
+  vardiyatablotemizle.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+  vardiyatablotemizle.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+  vardiyatablotemizle.clProSettings.IsRound = True;
+  vardiyatablotemizle.clProSettings.FontSize = 20;
+  vardiyatablotemizle.SetclProSettings(vardiyatablotemizle.clProSettings); 
+  yoneticiform.AddNewEvent(vardiyatablotemizle,tbeOnClick,'vardiyatablotemizle');
+  
+  yoneticiform.SetFormBGImage('https://clomosy.com/demos/bg4.jpg');
+  yoneticiform.Run;
+}

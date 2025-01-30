@@ -1,0 +1,68 @@
+var
+kayitform : tclform;
+kayitlayout : TClLayout;
+kullaniciadilabel : TClProLabe;
+telnoedit : TclProEdit;
+kayitbuton : TClProButton;
+
+void kayitbutonclick;
+{
+  //ShowMessage('insert into calisan values ('''+Clomosy.AppUserGUID+''','''+Clomosy.AppUserDisplayName+''','''+telnoedit.text+''','''+IntToStr(Clomosy.AppUserProfile)+''')');
+  Clomosy.DBSQLiteQuery.Sql.Text = 'insert into calisan values ('''+Clomosy.AppUserGUID+''','''+Clomosy.AppUserDisplayName+''','''+telnoedit.text+''','''+IntToStr(Clomosy.AppUserProfile)+''')';
+  Clomosy.DBSQLiteQuery.Exec;
+  
+  if(Clomosy.AppUserProfile)
+  {
+    Clomosy.rununit('yoneticiunit');
+  }
+  else
+  {
+    Clomosy.rununit('calisanunit');
+  }
+}
+
+{
+      kayitform = tclform.Create(self);
+      kayitlayout = kayitform.AddNewLayout(kayitform,'kayitlayout');
+      kayitlayout.align = alCenter;
+      kayitlayout.height = 300;
+      
+      kullaniciadilabel = kayitform.AddNewProLabel(kayitlayout, 'kullaniciadilabel', 'Kullanıcı ismi: '+Clomosy.AppUserDisplayName);
+      kullaniciadilabel.align = alTop;
+      kullaniciadilabel.clProSettings.FontSize = 20;
+      kullaniciadilabel.margins.left = 100;
+      kullaniciadilabel.margins.bottom = 5;
+      kullaniciadilabel.SetclProSettings(kullaniciadilabel.clProSettings); 
+      
+      telnoedit = kayitform.AddNewProEdit(kayitlayout, 'telnoedit', 'telefon numarası giriniz');
+      telnoedit.align = alcenter;
+      telnoedit.clProSettings.FontSize = 20;
+      telnoedit.height = 50;
+      telnoedit.width = 175;
+      telnoedit.clProSettings.BorderWidth = 1;
+      telnoedit.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+      telnoedit.clProSettings.IsRound = True;
+      telnoedit.cltypeoffield = taFloat;
+      telnoedit.SetclProSettings(telnoedit.clProSettings); 
+
+      
+      kayitbuton = kayitform.AddNewProButton(kayitlayout, 'kayitbuton', 'kayit ol');
+      kayitbuton.align = alBottom;
+      kayitbuton.width = 125;
+      kayitbuton.height = 35;
+      kayitbuton.margins.left = 125;
+      kayitbuton.margins.right = 125;
+      kayitbuton.clProSettings.BorderColor = clAlphaColor.clHexToColor('#00000');
+      kayitbuton.clProSettings.BorderWidth = 1;
+      kayitbuton.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#1fb6fe');
+      kayitbuton.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+      kayitbuton.clProSettings.IsRound = True;
+      kayitbuton.clProSettings.FontSize = 20;
+      kayitbuton.SetclProSettings(kayitbuton.clProSettings); 
+
+      kayitform.AddNewEvent(kayitbuton,tbeOnClick,'kayitbutonclick');
+      
+       kayitform.SetFormBGImage('https://clomosy.com/educa/bg1.png');
+      
+      kayitform.Run;
+}
